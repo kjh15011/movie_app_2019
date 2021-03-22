@@ -1,36 +1,58 @@
 import React from "react";
+import axios from "axios";
+import Movie from "./Movie";
+import "./App.css";
+
+//State가 필요 없는 경우 Component Class일 필요 없음
 class App extends React.Component {
   state = {
     isLoading: true,
     movies: []
   };
+  getMovies = async () => {
+    const { data: { data: { movies } } } = await axios.get("https://yts-proxy.now.sh/list_movies.json");
+    this.setState({ movies, isLoading: false });
+    console.log(movies)
+  };
 
-  constructor(props) {
-    super(props);
-    // 여기서 this.setState()를 호출하면 안 됩니다!
-    this.state = {
-      isLoading: true,
-      movies: []
-    };
-  }
+  // constructor(props) {
+  //   super(props);
+  //   // 여기서 this.setState()를 호출하면 안 됩니다!
+  //   this.state = {
+  //     isLoading: true,
+  //     movies: []
+  //   };
+  // }
 
   componentDidMount() {
     console.log("componentDidMount")
-    setTimeout(() => {
-      this.setState({
-        isLoading: false
-      });
-    }, 6000
-    )
+    this.getMovies();
   }
 
   render() {
     console.log("I'm rendering");
-    const { isLoading } = this.state;
+    const { isLoading, movies } = this.state;
     return (
-      <div>
-        {isLoading ? "Loading.." : "We are Ready"}
-      </div>)
+      <section className="container">
+        {isLoading ? (
+          <div className="loader">
+            <span className="loader__text">Loading..</span>
+          </div>) : (
+            <div className="movies">
+              {movies.map(movie => (
+                <Movie
+                  key={movie.id}
+                  id={movie.id}
+                  year={movie.year}
+                  title={movie.title}
+                  summary={movie.summary}
+                  poster={movie.medium_cover_image}
+                  genres={movie.genres}
+                />))}
+            </div>
+          )
+        }
+      </section>)
   }
 }
 
